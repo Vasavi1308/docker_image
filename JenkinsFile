@@ -1,0 +1,43 @@
+pipeline { 
+    environment { 
+        registry = "vasavidockerimage/python-flask-app" 
+        registryCredential = 'docker_credentials' 
+        dockerImage = '' 
+    }
+    agent any 
+    stages { 
+        stage('Cloning our Git') { 
+            steps { 
+                git branch:'master', url: 'https://github.com/Vasavi1308/docker_image.git' 
+            }
+        }
+        stage('Security Scan'){
+            steps {
+                script {
+                    sh 'docker run --user \$(id -u):\$(id -g) -v \$(pwd):/src --rm secfigo/bandit bandit -r /src -f json -o /src/bandit-output.json'
+                }
+            }
+        }
+        stage('Building our image') { 
+            steps { 
+                script { 
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                }
+            }
+        }
+        stage('Deploy our image') { 
+            steps { 
+                script { 
+                    docker.withRegistry( '', registryCredential ) { 
+                        dockerImage.push() 
+                    }
+                } 
+            }
+        } 
+        stage('Cleaning up') { 
+            steps { 
+                sh "docker rmi $registry:$BUILD_NUMBER" 
+            }
+        } 
+    }
+}
