@@ -38,6 +38,12 @@ pipeline {
             steps { 
                 sh "docker rmi $registry:$BUILD_NUMBER" 
             }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo 'Deploy the App using Kubernetes'
+                sh "kubectl apply -f python-flask-deployment.yml set image $registry:$BUILD_NUMBER"
+            }
         } 
     }
 }
