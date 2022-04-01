@@ -78,7 +78,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts articats: 'bandit-output.json', onlyIfSuccessful: true
+            archiveArtifacts artifacts: 'bandit-output.json', onlyIfSuccessful: true
         }
     }
 }
